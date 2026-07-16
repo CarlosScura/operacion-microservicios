@@ -13,5 +13,6 @@ class Tarjeta(database.Base):
     
     id = Column(Integer, primary_key=True)
     usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    nombre = Column(String(100), nullable=False)
     ultimos_4_digitos = Column(String(4), nullable=False)
     marca = Column(String(20), nullable=False)
