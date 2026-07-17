@@ -10,6 +10,11 @@ class UsuarioCreate(BaseModel):
     mail: str
     password: str
 
+# PUT /usuarios/{id}
+class UsuarioUpdate(BaseModel):
+    mail: str | None = None
+    password: str | None = None
+
 # POST /login
 class TokenResponse(BaseModel):
     access_token: str
