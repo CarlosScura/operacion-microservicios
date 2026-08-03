@@ -1,0 +1,113 @@
+services:
+  db_catalogo:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: catalogo_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./catalogo/init-db:/docker-entrypoint-initdb.d
+    networks:
+    - microservicios
+  
+  catalogo:
+    build: ./catalogo
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: db_catalogo
+      DB_PORT: 5432
+      DB_NAME: catalogo_db
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    depends_on:
+      - db_catalogo
+    networks:
+      - microservicios
+
+  db_inventario:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: inventario_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./inventario/init-db:/docker-entrypoint-initdb.d
+    networks:
+    - microservicios
+  
+  inventario:
+    build: ./inventario
+    ports:
+      - "8001:8001"
+    environment:
+      DB_HOST: db_inventario
+      DB_PORT: 5432
+      DB_NAME: inventario_db
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    depends_on:
+      - db_inventario
+    networks:
+      - microservicios
+
+  db_usuarios:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: usuarios_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./usuarios/init-db:/docker-entrypoint-initdb.d
+    networks:
+    - microservicios
+
+  usuarios:
+    build: ./usuarios
+    ports:
+      - "8002:8002"
+    environment:
+      DB_HOST: db_usuarios
+      DB_PORT: 5432
+      DB_NAME: usuarios_db
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    depends_on:
+      - db_usuarios
+    networks:
+      - microservicios
+
+  db_pedidos:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: pedidos_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./pedidos/init-db:/docker-entrypoint-initdb.d
+    networks:
+    - microservicios
+  
+  pedidos:
+    build: ./pedidos
+    ports:
+      - "8003:8003"
+    environment:
+      DB_HOST: db_pedidos
+      DB_PORT: 5432
+      DB_NAME: pedidos_db
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    depends_on:
+      - db_pedidos
+    networks:
+      - microservicios
+
+networks:
+  microservicios:
+    driver: bridge
+

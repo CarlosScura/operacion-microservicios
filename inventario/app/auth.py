@@ -1,36 +1,10 @@
-﻿from passlib.context import CryptContext
-from datetime import datetime, timedelta, timezone
+﻿from fastapi import HTTPException, Request, status
 from jose import JWTError, jwt
-from fastapi import HTTPException, Request, status
 import os
 
 
-# Creamos las constantes.
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 ALGORITHM = "HS256"
-EXPIRACION_MINUTOS = 60
-
-# Creamos el contexto de encriptación para las contraseñas.
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# Función para hashear la contraseña
-def hashear_password(password: str) -> str:
-    '''Hashea la contraseña utilizando bcrypt.'''
-    return pwd_context.hash(password)
-
-# Función para verificar la contraseña
-def verificar_password(password_plano: str, password_hash: str) -> bool:
-    '''Verifica si la contraseña en texto plano coincide con el hash almacenado.'''
-    return pwd_context.verify(password_plano, password_hash)
-
-# Función para crear un token JWT
-def crear_token(usuario_id: int) -> str:
-    '''Crea un token JWT para el usuario con el ID proporcionado.'''
-    datos = {"id": usuario_id}
-    expiracion = datetime.now(timezone.utc) + timedelta(minutes=EXPIRACION_MINUTOS)
-    datos.update({"exp": expiracion})
-    token = jwt.encode(datos, SECRET_KEY, algorithm=ALGORITHM)
-    return token
 
 
 def _get_secret_key() -> str:
@@ -41,7 +15,7 @@ def _get_secret_key() -> str:
 
 
 def verify_token(token: str) -> dict:
-    '''Verifica la firma y la validez del token JWT y devuelve las claims del usuario.'''
+    '''Verifica la firma y validez del token JWT y devuelve las claims del usuario.'''
     try:
         payload = jwt.decode(token, _get_secret_key(), algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:

@@ -12,7 +12,8 @@ class Pedido(database.Base):
 
     id = Column(Integer, primary_key=True)
     usuario_id = Column(Integer, nullable=False)
-    estado = Column(SQLEnum(EstadoPedido), nullable=False)
+    # Necesitamos el lambda porque SQLAlchemy envia en mayúsculas y la todo esta programado en minúsculas.
+    estado = Column(SQLEnum(EstadoPedido, values_callable=lambda x: [e.value for e in x]), nullable=False)
     
 class Item(database.Base):
     __tablename__ = "items"
