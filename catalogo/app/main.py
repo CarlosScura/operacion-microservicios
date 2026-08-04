@@ -1,12 +1,24 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
+from fastapi.security import HTTPBearer
 import database
 import models
 import schemas
 import auth
 
+security = HTTPBearer()
+
 # Iniciamos la aplicación FastAPI
-app = FastAPI()
+openapi_tags = [
+    {"name": "catalogo", "description": "Operaciones relacionadas al catálogo de juegos"}
+]
+
+app = FastAPI(
+    title="Catálogo API",
+    openapi_tags=openapi_tags,
+    swagger_ui_parameters={"persistAuthorization": True}
+)
+
 
 # Dependencia para obtener la sesión de la base de datos
 def get_db():

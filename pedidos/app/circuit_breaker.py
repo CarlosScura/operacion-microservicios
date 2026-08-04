@@ -26,20 +26,6 @@ def obtener_precio_juego(juego_id: int) -> float:
         raise HTTPException(status_code=503, detail="Error al obtener el precio del juego")
 
 
-@inventario_breaker
-def reservar_stock(pedido_id: int, juego_id: int, cantidad: int) -> dict:
-    '''Reserva stock en Inventario para un pedido.
-    Fallback: error controlado.'''
-    try:
-        response = httpx.put(
-            f"{INVENTARIO_URL}/reserva",
-            json={"pedido_id": pedido_id, "juego_id": juego_id, "cantidad": cantidad},
-            timeout=5
-        )
-        response.raise_for_status()
-        return response.json()
-    except (httpx.TimeoutException, httpx.HTTPStatusError):
-        raise HTTPException(status_code=503, detail="Inventario no disponible, reintentá más tarde")
 
 @inventario_breaker
 def reservar_stock(pedido_id: int, juego_id: int, cantidad: int) -> dict:
@@ -73,6 +59,25 @@ def cancelar_reserva(pedido_id: int) -> dict:
         response.raise_for_status()
         return response.json()
     except (httpx.TimeoutException, httpx.HTTPStatusError):
+        raise HTTPException(status_code=503, detail="Inventario no disponible, reintentá más tarde")
+
+
+@inventario_breaker
+def confirmar_reserva(pedido_id: int) -> dict:
+    '''Confirma una reserva en Inventario.'''
+    try:
+        response = httpx.put(
+            f"{INVENTARIO_URL}/reserva/confirmar",
+            json={"pedido_id": pedido_id},
+            timeout=5
+        )
+        if response.status_code == 404:
+            raise HTTPException(status_code=404, detail="Reserva no encontrada")
+        response.raise_for_status()
+        return response.json()
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=503, detail="Inventario no disponible, reintentá más tarde")
+    except httpx.HTTPStatusError:
         raise HTTPException(status_code=503, detail="Inventario no disponible, reintentá más tarde")
 
 

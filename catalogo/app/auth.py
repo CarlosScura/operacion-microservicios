@@ -1,4 +1,8 @@
-﻿from fastapi import HTTPException, Request, status
+﻿from fastapi import HTTPException, Request, status, Security
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+# Security scheme for OpenAPI / Swagger
+bearer_scheme = HTTPBearer(bearerFormat='JWT')
 from jose import JWTError, jwt
 import os
 
@@ -50,22 +54,12 @@ def verify_token(token: str) -> dict:
     return {"id": user_id}
 
 
-def get_current_user(request: Request) -> dict:
+def get_current_user(credentials: HTTPAuthorizationCredentials = Security(bearer_scheme)) -> dict:
     '''Extrae y valida el token Bearer de la cabecera Authorization.'''
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
+    if not credentials or not credentials.credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Se requiere un token Bearer en la cabecera Authorization",
             headers={"WWW-Authenticate": "Bearer"}
         )
-
-    token = auth_header.split(" ", 1)[1].strip()
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token vacío",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-
-    return verify_token(token)
+    return verify_token(credentials.credentials)

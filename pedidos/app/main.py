@@ -1,5 +1,6 @@
 ﻿from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from fastapi.security import HTTPBearer
 import database
 import models
 import schemas
@@ -8,7 +9,18 @@ from fastapi.responses import JSONResponse
 from pybreaker import CircuitBreakerError
 import circuit_breaker as cb
 
-app = FastAPI()
+
+security = HTTPBearer()
+
+openapi_tags = [
+    {"name": "pedidos", "description": "Operaciones relacionadas a pedidos, items y pagos"}
+]
+
+app = FastAPI(
+    title="Pedidos API",
+    openapi_tags=openapi_tags,
+    swagger_ui_parameters={"persistAuthorization": True}
+)
 
 @app.exception_handler(CircuitBreakerError)
 async def circuit_breaker_handler(request, exc):
